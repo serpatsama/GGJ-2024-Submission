@@ -1,63 +1,45 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private bool ismoving;
-    private float moveSpeed = 10.0f;
+    [SerializeField] private float moveSpeed = 5.0f;
+    [SerializeField] private float acceleration = 0.8f;
+    private float curSpeed;
+    private float maxSpeed;
     private Vector2 input;
-    [SerializeField]
-    private LayerMask solidObjectsLayer;
-    
+    [SerializeField] private LayerMask solidObjectsLayer;
+
+    private Rigidbody2D _rb;
+
     // Start is called before the first frame update
     void Start()
     {
+        _rb = GetComponent<Rigidbody2D>();
+        _rb.gravityScale = 0.0f;
+        _rb.angularDrag = 0.0f;
         Debug.Log("WAHAHAHA");
-        solidObjectsLayer = LayerMask.GetMask("SolidObjects");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!ismoving)
-        {
-            input.x = Input.GetAxis("Horizontal");
-            input.y = Input.GetAxis("Vertical");
-
-            if (input != Vector2.zero)
-            {
-                Vector3 position = transform.position;
-                position.x += input.x;
-                position.y += input.y;
-                if (IsWalkable(position))
-                {
-                    StartCoroutine(Move(position));
-                }
-            }
-        }
+        input.x = Input.GetAxis("Horizontal");
+        input.y = Input.GetAxis("Vertical");
+        input = input.normalized;
+        Debug.Log(input.x.ToString() + " " + input.y.ToString());
     }
 
-    IEnumerator Move(Vector3 destination)
+    private void FixedUpdate()
     {
-        ismoving = true;
-        while ((destination - transform.position).sqrMagnitude > Mathf.Epsilon)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, destination, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
+        curSpeed = moveSpeed;
+        maxSpeed = curSpeed;
 
-        transform.position = destination;
-
-        ismoving = false;
-    }
-
-    private bool IsWalkable(Vector3 destination)
-    {
-        if (Physics2D.OverlapCircle(destination, 0.2f, solidObjectsLayer) != null)
-        {
-            return false;
-        }
-
-        return true;
+        // the movement magic
+        _rb.velocity = new Vector2(
+            Mathf.Lerp(0, input.x * curSpeed, acceleration),
+            Mathf.Lerp(0, input.y * curSpeed, acceleration)
+        );
     }
 }
