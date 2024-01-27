@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
         input.x = Input.GetAxis("Horizontal");
         input.y = Input.GetAxis("Vertical");
         input = input.normalized;
-        Debug.Log(input.x.ToString() + " " + input.y.ToString());
+        // Debug.Log(input.x.ToString() + " " + input.y.ToString());
     }
 
     private void FixedUpdate()
