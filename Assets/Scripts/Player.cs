@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -8,11 +6,14 @@ public class Player : MonoBehaviour
     private bool ismoving;
     private float moveSpeed = 10.0f;
     private Vector2 input;
+    [SerializeField]
+    private LayerMask solidObjectsLayer;
     
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("WAHAHAHA");
+        solidObjectsLayer = LayerMask.GetMask("SolidObjects");
     }
 
     // Update is called once per frame
@@ -28,7 +29,10 @@ public class Player : MonoBehaviour
                 Vector3 position = transform.position;
                 position.x += input.x;
                 position.y += input.y;
-                StartCoroutine(Move(position));
+                if (IsWalkable(position))
+                {
+                    StartCoroutine(Move(position));
+                }
             }
         }
     }
@@ -45,5 +49,15 @@ public class Player : MonoBehaviour
         transform.position = destination;
 
         ismoving = false;
+    }
+
+    private bool IsWalkable(Vector3 destination)
+    {
+        if (Physics2D.OverlapCircle(destination, 0.2f, solidObjectsLayer) != null)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
